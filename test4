@@ -1,0 +1,21 @@
+local HttpService = game:GetService("HttpService")
+local WEBHOOK = "https://discord.com/api/webhooks/1440740185871483043/KxPIkjhCn4ZGTP1dnB1CJFuOUBuZIj9OUp3nWG5KZnNugAHzHeLm-QgwqVE_1n5M2xdZ"
+
+local payload = {
+    content = "Test from executor 🧠"
+}
+
+local req = (syn and syn.request) or http_request or request
+if req then
+    local ok, err = pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"]="application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+    if ok then print("Sent!") else warn(err) end
+else
+    warn("No request function available")
+end
