@@ -1,0 +1,64 @@
+-- Services
+local HttpService = game:GetService("HttpService")
+
+-- Your webhook URL
+local WEBHOOK = "https://discord.com/api/webhooks/1440740185871483043/KxPIkjhCn4ZGTP1dnB1CJFuOUBuZIj9OUp3nWG5KZnNugAHzHeLm-QgwqVE_1n5M2xdZ"
+
+-- Brainrot emoji table
+local Brainrots = {
+    ["la taco combinasion"] = "🌮🎩",
+    ["las sis"] = "👩‍👧",
+    ["los bros"] = "👨‍👦",
+    ["dragon cannelloni"] = "🐉🍝",
+    -- add all other Brainrots here in lowercase
+}
+
+-- Function to normalize strings
+local function normalizeName(name)
+    return (name:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1"):lower())
+end
+
+-- Example detected pets
+local detectedPets = {
+    {name="Dragon Cannelloni", value="20M/s", floor="2nd Floor"},
+    {name="Unknown Brainrot", value="1M/s", floor="1st Floor"}
+}
+
+-- Build message lines
+local lines = {}
+for _, pet in ipairs(detectedPets) do
+    local normalized = normalizeName(pet.name)
+    local emoji = Brainrots[normalized] or "🧠"
+    table.insert(lines, string.format("%s %s → %s → %s", emoji, pet.name, pet.value, pet.floor))
+end
+
+-- Prepare payload
+local payload = {
+    content = "@everyone Brainrot Scan Results",
+    embeds = {{
+        title = "Brainrot Detection",
+        color = 0xFFAA00,
+        description = table.concat(lines, "\n")
+    }},
+    allowed_mentions = {parse={"everyone"}}
+}
+
+-- Send webhook
+local req = (syn and syn.request) or http_request or request
+if req and WEBHOOK ~= "" then
+    local ok, err = pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+    if ok then
+        print("Webhook sent successfully!")
+    else
+        warn("Failed to send webhook:", err)
+    end
+else
+    warn("No request function available or webhook missing")
+end
