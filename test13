@@ -1,0 +1,24 @@
+local HttpService = game:GetService("HttpService")
+
+-- Load emoji table
+local success, Brainrots = pcall(function()
+    return loadstring(game:HttpGet("https://gitlab.com/nolag-idp-group/emojisforstlr/-/raw/main/stlr"))()
+end)
+
+if not success or type(Brainrots) ~= "table" then
+    warn("Failed to load Brainrots table!")
+    Brainrots = {}
+end
+
+-- Example brainrots detected from the game
+local detectedPets = {
+    {name="Dragon Cannelloni", value="20M/s", floor="2nd Floor"},
+    {name="Los Spaghettis", value="5M/s", floor="1st Floor"},
+    {name="Unknown Brainrot", value="1M/s", floor="1st Floor"}
+}
+
+for _, pet in ipairs(detectedPets) do
+    local lookupName = pet.name:gsub("^%s*(.-)%s*$", "%1")  -- trim spaces
+    local emoji = Brainrots[lookupName] or "🧠"
+    print("Pet name:", pet.name, "Lookup:", lookupName, "Emoji:", emoji)
+end
