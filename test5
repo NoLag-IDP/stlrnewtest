@@ -1,0 +1,21 @@
+local HttpService = game:GetService("HttpService")
+local WEBHOOK = "https://sendrequest.monkawpogu0.workers.dev/"
+
+local payload = {
+    content = "Test from executor 🧠"
+}
+
+local req = (syn and syn.request) or http_request or request
+if req then
+    local ok, err = pcall(function()
+        req({
+            Url = WEBHOOK,
+            Method = "POST",
+            Headers = {["Content-Type"]="application/json"},
+            Body = HttpService:JSONEncode(payload)
+        })
+    end)
+    if ok then print("Sent!") else warn(err) end
+else
+    warn("No request function available")
+end
